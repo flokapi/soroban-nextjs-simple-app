@@ -1,4 +1,7 @@
 import "dotenv/config"
+import { getPublicKey } from "@stellar/freighter-api"
+import { userSignTransaction } from "./freighter"
+
 import {
   Contract,
   SorobanRpc,
@@ -9,14 +12,18 @@ import {
   Address,
 } from "@stellar/stellar-sdk"
 
-import contracts from "../constants"
+import { contracts } from "../constants"
 
 let params = {
   fee: BASE_FEE,
   networkPassphrase: Networks.TESTNET,
 }
 
-async function contractInt(caller, functName, values) {
+const rpcUrl = "https://soroban-testnet.stellar.org"
+
+console.log("RPC url:", rpcUrl)
+
+async function contractInt(caller, contractAddress, functName, values) {
   const provider = new SorobanRpc.Server(rpcUrl, { allowHttp: true })
   const contract = new Contract(contractAddress)
   const sourceAccount = await provider.getAccount(caller)
@@ -59,11 +66,39 @@ async function contractInt(caller, functName, values) {
   }
 }
 
-async function helloHorld() {
-  let caller = await getPublicKey()
-  let result = await contractInt(caller, "view_poll", null)
-  let no = result._value[0]._attributes.val._value.toString()
-  let total = result._value[1]._attributes.val._value.toString()
-  let yes = result._value[2]._attributes.val._value.toString()
-  return [no, total, yes]
+async function readContract(caller, contractAddress, functName, values) {
+  const provider = new SorobanRpc.Server(rpcUrl, { allowHttp: true })
+  const contract = new Contract(contractAddress)
+  const sourceAccount = await provider.getAccount(caller)
+  let buildTx
+  if (values == null) {
+    buildTx = new TransactionBuilder(sourceAccount, params)
+      .addOperation(contract.call(functName))
+      .setTimeout(30)
+      .build()
+  } else {
+    buildTx = new TransactionBuilder(sourceAccount, params)
+      .addOperation(contract.call(functName, ...values))
+      .setTimeout(30)
+      .build()
+  }
+  let response = await provider.simulateTransaction(buildTx)
+  return response
+}
+
+export async function hello(to) {
+  const caller = await getPublicKey()
+  const arg = nativeToScVal(to, { type: "symbol" })
+  const response = await readContract(caller, contracts.helloWorld, "hello", [arg])
+  console.log(response)
+  let ans1 = response?.result?.retval?._value[0]._value.toString()
+  let ans2 = response?.result?.retval?._value[1]._value.toString()
+  return [ans1, ans2]
+}
+
+export async function increment() {
+  const caller = await getPublicKey()
+  const response = await contractInt(caller, contracts.increment, "increment", null)
+  let value = response?.result?.retval?._value[0]._value.toString()
+  return value
 }
