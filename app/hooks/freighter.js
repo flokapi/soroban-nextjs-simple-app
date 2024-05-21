@@ -2,27 +2,15 @@
 
 import { useState, useEffect } from "react"
 
-import { requestAccess, signTransaction, setAllowed } from "@stellar/freighter-api"
-
-const retrievePublicKey = async () => {
-  return publicKey
-}
+import { retrievePublicKey } from "../utils.js/freighter"
 
 export function useAccount() {
   const [address, setAddress] = useState("")
 
   async function updateData() {
-    let publicKey = ""
-    let error = ""
-    try {
-      publicKey = await requestAccess()
-    } catch (e) {
-      error = e
-    }
-    if (error) {
-      return error
-    }
-    setAddress(publicKey)
+    // console.log("Updating wallet data")
+    // console.log(await retrievePublicKey())
+    setAddress(await retrievePublicKey())
   }
 
   useEffect(() => {
