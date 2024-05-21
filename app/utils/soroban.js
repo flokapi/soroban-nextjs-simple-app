@@ -99,6 +99,7 @@ export async function hello(to) {
 export async function increment() {
   const caller = await getPublicKey()
   const response = await contractInt(caller, contracts.increment, "increment", null)
-  let value = response?.result?.retval?._value[0]._value.toString()
+  console.log(response)
+  let value = response._value
   return value
 }
