@@ -1,18 +1,13 @@
 "use client"
 
 import { useAccount } from "../hooks/freighter"
-import { connectWallet } from "../utils.js/freighter"
+import { requestAccess } from "@stellar/freighter-api"
 
 export default function WalletConnect() {
   const { address } = useAccount()
 
   console.log("Rerendering connect button")
   console.log("Address:", address)
-
-  async function connectWalletCallback() {
-    console.log("Connecting wallet request")
-    connectWallet()
-  }
 
   return (
     <div className="flex flex-row space-x-4 items-center">
@@ -23,9 +18,7 @@ export default function WalletConnect() {
       ) : (
         <button
           className="bg-gray-500 text-white px-3 py-2 rounded font-mono"
-          onClick={() => {
-            connectWalletCallback()
-          }}
+          onClick={requestAccess}
         >
           Connect Wallet
         </button>

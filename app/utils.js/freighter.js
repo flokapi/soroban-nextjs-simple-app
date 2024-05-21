@@ -1,34 +1,6 @@
-import { requestAccess, signTransaction, getPublicKey } from "@stellar/freighter-api"
+import { signTransaction } from "@stellar/freighter-api"
 
-const retrievePublicKey = async () => {
-  let publicKey = ""
-  let error = ""
-  try {
-    publicKey = await getPublicKey()
-  } catch (e) {
-    error = e
-  }
-  if (error) {
-    return error
-  }
-  return publicKey
-}
-
-export async function connectWallet() {
-  let publicKey = ""
-  let error = ""
-  try {
-    publicKey = await requestAccess()
-  } catch (e) {
-    error = e
-  }
-  if (error) {
-    return error
-  }
-  return publicKey
-}
-
-const userSignTransaction = async (xdr, network, signWith) => {
+export async function userSignTransaction(xdr, network, signWith) {
   let signedTransaction = ""
   let error = ""
   try {
@@ -44,5 +16,3 @@ const userSignTransaction = async (xdr, network, signWith) => {
   }
   return signedTransaction
 }
-
-export { retrievePublicKey, userSignTransaction }
